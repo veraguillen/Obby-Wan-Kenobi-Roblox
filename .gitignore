@@ -1,0 +1,11 @@
+# Project place file
+/Semillero Ninjas & vaqueros.rbxlx
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+
+sourcemap.json
+
+# Claude Code: local/machine-specific permissions, no compartir
+.claude/settings.local.json

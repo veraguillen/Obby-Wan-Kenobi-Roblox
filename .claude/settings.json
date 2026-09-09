@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rojo --version)",
+      "Bash(rojo build *)",
+      "Bash(rojo serve *)",
+      "PowerShell(rojo *)",
+      "PowerShell(rojo serve *)",
+      "Bash(rokit --version)",
+      "PowerShell(rokit *)",
+      "PowerShell(Invoke-RestMethod https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.ps1 | Invoke-Expression)",
+      "Bash(~/.rokit/bin/rojo.exe build *)",
+      "Bash(nohup ~/.rokit/bin/rojo.exe serve default.project.json)",
+      "Bash(where rokit *)",
+      "Bash(where foreman *)",
+      "Bash(where cargo *)",
+      "Bash(where scoop *)",
+      "Bash(curl -s -m 2 http://localhost:34872/api/rojo)",
+      "Bash(curl -s -m 3 http://localhost:34872/api/rojo)",
+      "Bash(curl *)",
+      "Bash(git status *)",
+      "Bash(git check-ignore *)",
+      "Bash(gh --version)",
+      "Bash(tasklist)",
+      "Bash(wmic process *)",
+      "Bash(disown)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(echo \"exit:$?\")",
+      "Bash(rm build_check.rbxlx)",
+      "PowerShell(winget search *)",
+      "PowerShell(choco search *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(Get-CimInstance *)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell(Stop-Process *)",
+      "WebFetch(domain:github.com)",
+      "Skill(run)"
+    ]
+  }
+}

@@ -1,0 +1,1351 @@
+{
+  "name": "Semillero Ninjas & vaqueros",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      },
+      "Modules": {
+        "$path": "src/modules"
+      },
+      "RemoteEvents": {
+        "$className": "Folder",
+        "RoomStatusEvent": {
+          "$className": "RemoteEvent"
+        },
+        "CheckpointProgressEvent": {
+          "$className": "RemoteEvent"
+        },
+        "DynamiteActivateEvent": {
+          "$className": "RemoteEvent"
+        },
+        "DynamiteStatusEvent": {
+          "$className": "RemoteEvent"
+        },
+        "DynamiteMessageEvent": {
+          "$className": "RemoteEvent"
+        }
+      }
+    },
+
+    "ServerScriptService": {
+      "Server": {
+        "$path": "src/server"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src/client"
+        }
+      }
+    },
+
+    "Workspace": {
+      "$properties": {
+        "FilteringEnabled": true
+      },
+      "Lobby": {
+        "$className": "Folder",
+        "LobbyFloor": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Material": "SmoothPlastic",
+            "Position": [500, 50, -900],
+            "Size": [600, 2, 600]
+          }
+        },
+        "LobbySpawn": {
+          "$className": "SpawnLocation",
+          "$properties": {
+            "Anchored": true,
+            "CanCollide": false,
+            "Material": "SmoothPlastic",
+            "Position": [500, 52.5, -900],
+            "Size": [6, 1, 6],
+            "Enabled": true,
+            "Neutral": true,
+            "Duration": 0
+          }
+        },
+        "Wall_North": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "Transparency": 1,
+            "Position": [500, 56, -1201],
+            "Size": [604, 10, 2]
+          }
+        },
+        "Wall_South": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "Transparency": 1,
+            "Position": [500, 56, -599],
+            "Size": [604, 10, 2]
+          }
+        },
+        "Wall_East": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "Transparency": 1,
+            "Position": [801, 56, -900],
+            "Size": [2, 10, 604]
+          }
+        },
+        "Wall_West": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "Transparency": 1,
+            "Position": [199, 56, -900],
+            "Size": [2, 10, 604]
+          }
+        },
+        "Portal_Ninja_1": {
+          "$className": "Part",
+          "$properties": { "Anchored": true, "CanCollide": false, "Color": [0, 0.8, 0.4], "Transparency": 0.3, "Position": [300, 60, -1100], "Size": [12, 16, 2] },
+          "TouchZone": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": false, "Transparency": 1, "Position": [300, 60, -1100], "Size": [8, 12, 1] },
+            "$attributes": { "TargetTrack": "Track_A", "ServerIndex": 1 }
+          },
+          "StatusGui": {
+            "$className": "SurfaceGui",
+            "$properties": { "Face": "Front", "AlwaysOnTop": true },
+            "StatusLabel": {
+              "$className": "TextLabel",
+              "$properties": { "Size": { "UDim2": [[1, 0], [1, 0]] }, "BackgroundTransparency": 1, "TextScaled": true, "Font": "GothamBold", "TextColor3": [1, 1, 1], "Text": "Esperando jugadores..." }
+            }
+          }
+        },
+        "Portal_Ninja_2": {
+          "$className": "Part",
+          "$properties": { "Anchored": true, "CanCollide": false, "Color": [0, 0.8, 0.4], "Transparency": 0.3, "Position": [300, 60, -1000], "Size": [12, 16, 2] },
+          "TouchZone": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": false, "Transparency": 1, "Position": [300, 60, -1000], "Size": [8, 12, 1] },
+            "$attributes": { "TargetTrack": "Track_A", "ServerIndex": 2 }
+          },
+          "StatusGui": {
+            "$className": "SurfaceGui",
+            "$properties": { "Face": "Front", "AlwaysOnTop": true },
+            "StatusLabel": {
+              "$className": "TextLabel",
+              "$properties": { "Size": { "UDim2": [[1, 0], [1, 0]] }, "BackgroundTransparency": 1, "TextScaled": true, "Font": "GothamBold", "TextColor3": [1, 1, 1], "Text": "Esperando jugadores..." }
+            }
+          }
+        },
+        "Portal_Ninja_3": {
+          "$className": "Part",
+          "$properties": { "Anchored": true, "CanCollide": false, "Color": [0, 0.8, 0.4], "Transparency": 0.3, "Position": [300, 60, -900], "Size": [12, 16, 2] },
+          "TouchZone": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": false, "Transparency": 1, "Position": [300, 60, -900], "Size": [8, 12, 1] },
+            "$attributes": { "TargetTrack": "Track_A", "ServerIndex": 3 }
+          },
+          "StatusGui": {
+            "$className": "SurfaceGui",
+            "$properties": { "Face": "Front", "AlwaysOnTop": true },
+            "StatusLabel": {
+              "$className": "TextLabel",
+              "$properties": { "Size": { "UDim2": [[1, 0], [1, 0]] }, "BackgroundTransparency": 1, "TextScaled": true, "Font": "GothamBold", "TextColor3": [1, 1, 1], "Text": "Esperando jugadores..." }
+            }
+          }
+        },
+        "Portal_Ninja_4": {
+          "$className": "Part",
+          "$properties": { "Anchored": true, "CanCollide": false, "Color": [0, 0.8, 0.4], "Transparency": 0.3, "Position": [300, 60, -800], "Size": [12, 16, 2] },
+          "TouchZone": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": false, "Transparency": 1, "Position": [300, 60, -800], "Size": [8, 12, 1] },
+            "$attributes": { "TargetTrack": "Track_A", "ServerIndex": 4 }
+          },
+          "StatusGui": {
+            "$className": "SurfaceGui",
+            "$properties": { "Face": "Front", "AlwaysOnTop": true },
+            "StatusLabel": {
+              "$className": "TextLabel",
+              "$properties": { "Size": { "UDim2": [[1, 0], [1, 0]] }, "BackgroundTransparency": 1, "TextScaled": true, "Font": "GothamBold", "TextColor3": [1, 1, 1], "Text": "Esperando jugadores..." }
+            }
+          }
+        },
+        "Portal_Ninja_5": {
+          "$className": "Part",
+          "$properties": { "Anchored": true, "CanCollide": false, "Color": [0, 0.8, 0.4], "Transparency": 0.3, "Position": [300, 60, -700], "Size": [12, 16, 2] },
+          "TouchZone": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": false, "Transparency": 1, "Position": [300, 60, -700], "Size": [8, 12, 1] },
+            "$attributes": { "TargetTrack": "Track_A", "ServerIndex": 5 }
+          },
+          "StatusGui": {
+            "$className": "SurfaceGui",
+            "$properties": { "Face": "Front", "AlwaysOnTop": true },
+            "StatusLabel": {
+              "$className": "TextLabel",
+              "$properties": { "Size": { "UDim2": [[1, 0], [1, 0]] }, "BackgroundTransparency": 1, "TextScaled": true, "Font": "GothamBold", "TextColor3": [1, 1, 1], "Text": "Esperando jugadores..." }
+            }
+          }
+        },
+        "Portal_Cowboy_1": {
+          "$className": "Part",
+          "$properties": { "Anchored": true, "CanCollide": false, "Color": [1, 0.5, 0.1], "Transparency": 0.3, "Position": [700, 60, -1100], "Size": [12, 16, 2] },
+          "TouchZone": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": false, "Transparency": 1, "Position": [700, 60, -1100], "Size": [8, 12, 1] },
+            "$attributes": { "TargetTrack": "Track_B", "ServerIndex": 1 }
+          },
+          "StatusGui": {
+            "$className": "SurfaceGui",
+            "$properties": { "Face": "Front", "AlwaysOnTop": true },
+            "StatusLabel": {
+              "$className": "TextLabel",
+              "$properties": { "Size": { "UDim2": [[1, 0], [1, 0]] }, "BackgroundTransparency": 1, "TextScaled": true, "Font": "GothamBold", "TextColor3": [1, 1, 1], "Text": "Esperando jugadores..." }
+            }
+          }
+        },
+        "Portal_Cowboy_2": {
+          "$className": "Part",
+          "$properties": { "Anchored": true, "CanCollide": false, "Color": [1, 0.5, 0.1], "Transparency": 0.3, "Position": [700, 60, -1000], "Size": [12, 16, 2] },
+          "TouchZone": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": false, "Transparency": 1, "Position": [700, 60, -1000], "Size": [8, 12, 1] },
+            "$attributes": { "TargetTrack": "Track_B", "ServerIndex": 2 }
+          },
+          "StatusGui": {
+            "$className": "SurfaceGui",
+            "$properties": { "Face": "Front", "AlwaysOnTop": true },
+            "StatusLabel": {
+              "$className": "TextLabel",
+              "$properties": { "Size": { "UDim2": [[1, 0], [1, 0]] }, "BackgroundTransparency": 1, "TextScaled": true, "Font": "GothamBold", "TextColor3": [1, 1, 1], "Text": "Esperando jugadores..." }
+            }
+          }
+        },
+        "Portal_Cowboy_3": {
+          "$className": "Part",
+          "$properties": { "Anchored": true, "CanCollide": false, "Color": [1, 0.5, 0.1], "Transparency": 0.3, "Position": [700, 60, -900], "Size": [12, 16, 2] },
+          "TouchZone": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": false, "Transparency": 1, "Position": [700, 60, -900], "Size": [8, 12, 1] },
+            "$attributes": { "TargetTrack": "Track_B", "ServerIndex": 3 }
+          },
+          "StatusGui": {
+            "$className": "SurfaceGui",
+            "$properties": { "Face": "Front", "AlwaysOnTop": true },
+            "StatusLabel": {
+              "$className": "TextLabel",
+              "$properties": { "Size": { "UDim2": [[1, 0], [1, 0]] }, "BackgroundTransparency": 1, "TextScaled": true, "Font": "GothamBold", "TextColor3": [1, 1, 1], "Text": "Esperando jugadores..." }
+            }
+          }
+        },
+        "Portal_Cowboy_4": {
+          "$className": "Part",
+          "$properties": { "Anchored": true, "CanCollide": false, "Color": [1, 0.5, 0.1], "Transparency": 0.3, "Position": [700, 60, -800], "Size": [12, 16, 2] },
+          "TouchZone": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": false, "Transparency": 1, "Position": [700, 60, -800], "Size": [8, 12, 1] },
+            "$attributes": { "TargetTrack": "Track_B", "ServerIndex": 4 }
+          },
+          "StatusGui": {
+            "$className": "SurfaceGui",
+            "$properties": { "Face": "Front", "AlwaysOnTop": true },
+            "StatusLabel": {
+              "$className": "TextLabel",
+              "$properties": { "Size": { "UDim2": [[1, 0], [1, 0]] }, "BackgroundTransparency": 1, "TextScaled": true, "Font": "GothamBold", "TextColor3": [1, 1, 1], "Text": "Esperando jugadores..." }
+            }
+          }
+        },
+        "Portal_Cowboy_5": {
+          "$className": "Part",
+          "$properties": { "Anchored": true, "CanCollide": false, "Color": [1, 0.5, 0.1], "Transparency": 0.3, "Position": [700, 60, -700], "Size": [12, 16, 2] },
+          "TouchZone": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": false, "Transparency": 1, "Position": [700, 60, -700], "Size": [8, 12, 1] },
+            "$attributes": { "TargetTrack": "Track_B", "ServerIndex": 5 }
+          },
+          "StatusGui": {
+            "$className": "SurfaceGui",
+            "$properties": { "Face": "Front", "AlwaysOnTop": true },
+            "StatusLabel": {
+              "$className": "TextLabel",
+              "$properties": { "Size": { "UDim2": [[1, 0], [1, 0]] }, "BackgroundTransparency": 1, "TextScaled": true, "Font": "GothamBold", "TextColor3": [1, 1, 1], "Text": "Esperando jugadores..." }
+            }
+          }
+        },
+        "HostNPC": {
+          "$className": "Model",
+          "PlaceholderBody": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 0.6, 0],
+              "Position": [500, 54, -880],
+              "Size": [4, 6, 2]
+            }
+          }
+        }
+      },
+      "Track_A": {
+        "$className": "Folder",
+        "Stage_1": {
+          "$className": "Folder",
+          "Stage_1_Platform": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Position": [0, 0, 0],
+              "Size": [450, 4, 150]
+            }
+          },
+          "Start_Barrier": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Material": "Neon",
+              "Color": [1, 0.2, 0.2],
+              "Transparency": 0.5,
+              "Position": [0, 12, 73],
+              "Size": [450, 20, 2]
+            }
+          },
+          "Host_Spot": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": false,
+              "Material": "Plastic",
+              "Color": [0.5, 0.5, 0.5],
+              "Position": [0, 120.5, 0],
+              "Size": [4, 5, 4]
+            }
+          },
+          "Checkpoint_Pad": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 1, 0],
+              "Position": [0, 16, 0],
+              "Size": [20, 4, 20]
+            }
+          },
+          "HostNPC": {
+            "$className": "Model",
+            "PlaceholderBody": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "CanCollide": false,
+                "CanQuery": false,
+                "Material": "Plastic",
+                "Color": [1, 0.6, 0],
+                "Position": [20, 3, 0],
+                "Size": [4, 6, 2]
+              }
+            }
+          },
+          "TestStairs": {
+            "$className": "Folder",
+            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [22.00, 6.00, 0.00], "Size": [12, 2, 6] } },
+            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [19.05, 11.00, 11.00], "Size": [12, 2, 6] } },
+            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [11.00, 16.00, 19.05], "Size": [12, 2, 6] } }
+          },
+          "Wall_North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [0, 60, 76],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [0, 60, -76],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [226, 60, 0],
+              "Size": [2, 130, 154]
+            }
+          },
+          "Wall_West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [-226, 60, 0],
+              "Size": [2, 130, 154]
+            }
+          }
+        },
+        "Stage_2": {
+          "$className": "Folder",
+          "Stage_2_Platform": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Position": [0, 0, 200],
+              "Size": [450, 4, 150]
+            }
+          },
+          "Checkpoint_Pad": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 1, 0],
+              "Position": [0, 16, 200],
+              "Size": [20, 4, 20]
+            }
+          },
+          "HostNPC": {
+            "$className": "Model",
+            "PlaceholderBody": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "CanCollide": false,
+                "CanQuery": false,
+                "Material": "Plastic",
+                "Color": [1, 0.6, 0],
+                "Position": [20, 3, 200],
+                "Size": [4, 6, 2]
+              }
+            }
+          },
+          "TestStairs": {
+            "$className": "Folder",
+            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [22.00, 6.00, 200.00], "Size": [12, 2, 6] } },
+            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [19.05, 11.00, 211.00], "Size": [12, 2, 6] } },
+            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [11.00, 16.00, 219.05], "Size": [12, 2, 6] } }
+          },
+          "Wall_North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [0, 60, 276],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [0, 60, 124],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [226, 60, 200],
+              "Size": [2, 130, 154]
+            }
+          },
+          "Wall_West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [-226, 60, 200],
+              "Size": [2, 130, 154]
+            }
+          }
+        },
+        "Stage_3": {
+          "$className": "Folder",
+          "Stage_3_Platform": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Position": [0, 0, 400],
+              "Size": [450, 4, 150]
+            }
+          },
+          "Checkpoint_Pad": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 1, 0],
+              "Position": [0, 16, 400],
+              "Size": [20, 4, 20]
+            }
+          },
+          "HostNPC": {
+            "$className": "Model",
+            "PlaceholderBody": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "CanCollide": false,
+                "CanQuery": false,
+                "Material": "Plastic",
+                "Color": [1, 0.6, 0],
+                "Position": [20, 3, 400],
+                "Size": [4, 6, 2]
+              }
+            }
+          },
+          "TestStairs": {
+            "$className": "Folder",
+            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [22.00, 6.00, 400.00], "Size": [12, 2, 6] } },
+            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [19.05, 11.00, 411.00], "Size": [12, 2, 6] } },
+            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [11.00, 16.00, 419.05], "Size": [12, 2, 6] } }
+          },
+          "Wall_North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [0, 60, 476],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [0, 60, 324],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [226, 60, 400],
+              "Size": [2, 130, 154]
+            }
+          },
+          "Wall_West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [-226, 60, 400],
+              "Size": [2, 130, 154]
+            }
+          }
+        },
+        "Stage_4": {
+          "$className": "Folder",
+          "Stage_4_Platform": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Position": [0, 0, 600],
+              "Size": [450, 4, 150]
+            }
+          },
+          "Checkpoint_Pad": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 1, 0],
+              "Position": [0, 16, 600],
+              "Size": [20, 4, 20]
+            }
+          },
+          "HostNPC": {
+            "$className": "Model",
+            "PlaceholderBody": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "CanCollide": false,
+                "CanQuery": false,
+                "Material": "Plastic",
+                "Color": [1, 0.6, 0],
+                "Position": [20, 3, 600],
+                "Size": [4, 6, 2]
+              }
+            }
+          },
+          "TestStairs": {
+            "$className": "Folder",
+            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [22.00, 6.00, 600.00], "Size": [12, 2, 6] } },
+            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [19.05, 11.00, 611.00], "Size": [12, 2, 6] } },
+            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [11.00, 16.00, 619.05], "Size": [12, 2, 6] } }
+          },
+          "Wall_North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [0, 60, 676],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [0, 60, 524],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [226, 60, 600],
+              "Size": [2, 130, 154]
+            }
+          },
+          "Wall_West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [-226, 60, 600],
+              "Size": [2, 130, 154]
+            }
+          }
+        },
+        "Stage_5": {
+          "$className": "Folder",
+          "Stage_5_Platform": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Position": [0, 0, 800],
+              "Size": [450, 4, 150]
+            }
+          },
+          "Checkpoint_Pad": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 1, 0],
+              "Position": [0, 16, 800],
+              "Size": [20, 4, 20]
+            }
+          },
+          "HostNPC": {
+            "$className": "Model",
+            "PlaceholderBody": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "CanCollide": false,
+                "CanQuery": false,
+                "Material": "Plastic",
+                "Color": [1, 0.6, 0],
+                "Position": [20, 3, 800],
+                "Size": [4, 6, 2]
+              }
+            }
+          },
+          "TestStairs": {
+            "$className": "Folder",
+            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [22.00, 6.00, 800.00], "Size": [12, 2, 6] } },
+            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [19.05, 11.00, 811.00], "Size": [12, 2, 6] } },
+            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [11.00, 16.00, 819.05], "Size": [12, 2, 6] } }
+          },
+          "Wall_North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [0, 60, 876],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [0, 60, 724],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [226, 60, 800],
+              "Size": [2, 130, 154]
+            }
+          },
+          "Wall_West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [-226, 60, 800],
+              "Size": [2, 130, 154]
+            }
+          }
+        }
+      },
+      "Track_B": {
+        "$className": "Folder",
+        "Stage_1": {
+          "$className": "Folder",
+          "Stage_1_Platform": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Position": [1000, 0, 0],
+              "Size": [450, 4, 150]
+            }
+          },
+          "Start_Barrier": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Material": "Neon",
+              "Color": [1, 0.2, 0.2],
+              "Transparency": 0.5,
+              "Position": [1000, 12, 73],
+              "Size": [450, 20, 2]
+            }
+          },
+          "Host_Spot": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": false,
+              "Material": "Plastic",
+              "Color": [0.5, 0.5, 0.5],
+              "Position": [1000, 120.5, 0],
+              "Size": [4, 5, 4]
+            }
+          },
+          "Checkpoint_Pad": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 1, 0],
+              "Position": [1000, 16, 0],
+              "Size": [20, 4, 20]
+            }
+          },
+          "HostNPC": {
+            "$className": "Model",
+            "PlaceholderBody": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "CanCollide": false,
+                "CanQuery": false,
+                "Material": "Plastic",
+                "Color": [1, 0.6, 0],
+                "Position": [1020, 3, 0],
+                "Size": [4, 6, 2]
+              }
+            }
+          },
+          "TestStairs": {
+            "$className": "Folder",
+            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1022.00, 6.00, 0.00], "Size": [12, 2, 6] } },
+            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1019.05, 11.00, 11.00], "Size": [12, 2, 6] } },
+            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1011.00, 16.00, 19.05], "Size": [12, 2, 6] } }
+          },
+          "Wall_North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1000, 60, 76],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1000, 60, -76],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1226, 60, 0],
+              "Size": [2, 130, 154]
+            }
+          },
+          "Wall_West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [774, 60, 0],
+              "Size": [2, 130, 154]
+            }
+          }
+        },
+        "Stage_2": {
+          "$className": "Folder",
+          "Stage_2_Platform": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Position": [1000, 0, 200],
+              "Size": [450, 4, 150]
+            }
+          },
+          "Checkpoint_Pad": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 1, 0],
+              "Position": [1000, 16, 200],
+              "Size": [20, 4, 20]
+            }
+          },
+          "HostNPC": {
+            "$className": "Model",
+            "PlaceholderBody": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "CanCollide": false,
+                "CanQuery": false,
+                "Material": "Plastic",
+                "Color": [1, 0.6, 0],
+                "Position": [1020, 3, 200],
+                "Size": [4, 6, 2]
+              }
+            }
+          },
+          "TestStairs": {
+            "$className": "Folder",
+            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1022.00, 6.00, 200.00], "Size": [12, 2, 6] } },
+            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1019.05, 11.00, 211.00], "Size": [12, 2, 6] } },
+            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1011.00, 16.00, 219.05], "Size": [12, 2, 6] } }
+          },
+          "Wall_North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1000, 60, 276],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1000, 60, 124],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1226, 60, 200],
+              "Size": [2, 130, 154]
+            }
+          },
+          "Wall_West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [774, 60, 200],
+              "Size": [2, 130, 154]
+            }
+          }
+        },
+        "Stage_3": {
+          "$className": "Folder",
+          "Stage_3_Platform": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Position": [1000, 0, 400],
+              "Size": [450, 4, 150]
+            }
+          },
+          "Checkpoint_Pad": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 1, 0],
+              "Position": [1000, 16, 400],
+              "Size": [20, 4, 20]
+            }
+          },
+          "HostNPC": {
+            "$className": "Model",
+            "PlaceholderBody": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "CanCollide": false,
+                "CanQuery": false,
+                "Material": "Plastic",
+                "Color": [1, 0.6, 0],
+                "Position": [1020, 3, 400],
+                "Size": [4, 6, 2]
+              }
+            }
+          },
+          "TestStairs": {
+            "$className": "Folder",
+            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1022.00, 6.00, 400.00], "Size": [12, 2, 6] } },
+            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1019.05, 11.00, 411.00], "Size": [12, 2, 6] } },
+            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1011.00, 16.00, 419.05], "Size": [12, 2, 6] } }
+          },
+          "Wall_North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1000, 60, 476],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1000, 60, 324],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1226, 60, 400],
+              "Size": [2, 130, 154]
+            }
+          },
+          "Wall_West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [774, 60, 400],
+              "Size": [2, 130, 154]
+            }
+          }
+        },
+        "Stage_4": {
+          "$className": "Folder",
+          "Stage_4_Platform": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Position": [1000, 0, 600],
+              "Size": [450, 4, 150]
+            }
+          },
+          "Checkpoint_Pad": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 1, 0],
+              "Position": [1000, 16, 600],
+              "Size": [20, 4, 20]
+            }
+          },
+          "HostNPC": {
+            "$className": "Model",
+            "PlaceholderBody": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "CanCollide": false,
+                "CanQuery": false,
+                "Material": "Plastic",
+                "Color": [1, 0.6, 0],
+                "Position": [1020, 3, 600],
+                "Size": [4, 6, 2]
+              }
+            }
+          },
+          "TestStairs": {
+            "$className": "Folder",
+            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1022.00, 6.00, 600.00], "Size": [12, 2, 6] } },
+            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1019.05, 11.00, 611.00], "Size": [12, 2, 6] } },
+            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1011.00, 16.00, 619.05], "Size": [12, 2, 6] } }
+          },
+          "Wall_North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1000, 60, 676],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1000, 60, 524],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1226, 60, 600],
+              "Size": [2, 130, 154]
+            }
+          },
+          "Wall_West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [774, 60, 600],
+              "Size": [2, 130, 154]
+            }
+          }
+        },
+        "Stage_5": {
+          "$className": "Folder",
+          "Stage_5_Platform": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Position": [1000, 0, 800],
+              "Size": [450, 4, 150]
+            }
+          },
+          "Checkpoint_Pad": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 1, 0],
+              "Position": [1000, 16, 800],
+              "Size": [20, 4, 20]
+            }
+          },
+          "HostNPC": {
+            "$className": "Model",
+            "PlaceholderBody": {
+              "$className": "Part",
+              "$properties": {
+                "Anchored": true,
+                "CanCollide": false,
+                "CanQuery": false,
+                "Material": "Plastic",
+                "Color": [1, 0.6, 0],
+                "Position": [1020, 3, 800],
+                "Size": [4, 6, 2]
+              }
+            }
+          },
+          "TestStairs": {
+            "$className": "Folder",
+            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1022.00, 6.00, 800.00], "Size": [12, 2, 6] } },
+            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1019.05, 11.00, 811.00], "Size": [12, 2, 6] } },
+            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1011.00, 16.00, 819.05], "Size": [12, 2, 6] } }
+          },
+          "Wall_North": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1000, 60, 876],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_South": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1000, 60, 724],
+              "Size": [454, 130, 2]
+            }
+          },
+          "Wall_East": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [1226, 60, 800],
+              "Size": [2, 130, 154]
+            }
+          },
+          "Wall_West": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "CanCollide": true,
+              "Transparency": 1,
+              "Position": [774, 60, 800],
+              "Size": [2, 130, 154]
+            }
+          }
+        }
+      },
+      "Boss_Arena": {
+        "$className": "Folder",
+        "Boss_Arena_Floor": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Material": "SmoothPlastic",
+            "Position": [500, 20, -340],
+            "Size": [120, 2, 120]
+          }
+        },
+        "Boss_Spot": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "CanCollide": false,
+            "Position": [500, 27, -340],
+            "Size": [8, 12, 8]
+          }
+        },
+        "Entry_Platform_A": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Material": "Plastic",
+            "Position": [320, 20, -390],
+            "Size": [240, 4, 20]
+          }
+        },
+        "Entry_Platform_B": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Material": "Plastic",
+            "Position": [240, 20, -390],
+            "Size": [640, 4, 20]
+          }
+        },
+        "Boss_Core": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "Material": "Neon",
+            "Shape": "Ball",
+            "Color": [0.6, 0.05, 0.05],
+            "Position": [500, 27, -340],
+            "Size": [10, 10, 10]
+          },
+          "HealthBarGui": {
+            "$className": "BillboardGui",
+            "$properties": {
+              "Size": { "UDim2": [[0, 240], [0, 30]] },
+              "StudsOffset": [0, 10, 0],
+              "AlwaysOnTop": true,
+              "MaxDistance": 150
+            },
+            "Background": {
+              "$className": "Frame",
+              "$properties": {
+                "Size": { "UDim2": [[1, 0], [1, 0]] },
+                "BackgroundColor3": [0, 0, 0],
+                "BackgroundTransparency": 0.2,
+                "BorderSizePixel": 0
+              },
+              "Fill": {
+                "$className": "Frame",
+                "$properties": {
+                  "Size": { "UDim2": [[1, 0], [1, 0]] },
+                  "BackgroundColor3": [0, 0.8, 0.2],
+                  "BorderSizePixel": 0
+                }
+              }
+            }
+          },
+          "VictoryGui": {
+            "$className": "BillboardGui",
+            "$properties": {
+              "Size": { "UDim2": [[0, 400], [0, 80]] },
+              "StudsOffset": [0, 18, 0],
+              "AlwaysOnTop": true,
+              "Enabled": false
+            },
+            "VictoryLabel": {
+              "$className": "TextLabel",
+              "$properties": {
+                "Size": { "UDim2": [[1, 0], [1, 0]] },
+                "BackgroundColor3": [0, 0, 0],
+                "BackgroundTransparency": 0.2,
+                "TextScaled": true,
+                "Font": "GothamBold",
+                "TextColor3": [1, 1, 1],
+                "Text": "¡Victoria! El jefe ha sido derrotado."
+              }
+            }
+          }
+        }
+      },
+      "Host_Area": {
+        "$className": "Folder",
+        "HostPlatform": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Material": "Plastic",
+            "Position": [130, 0, -620],
+            "Size": [20, 2, 20]
+          }
+        },
+        "HostNPC": {
+          "$className": "Model",
+          "PlaceholderBody": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 0.6, 0],
+              "Position": [130, 4, -620],
+              "Size": [4, 6, 2]
+            }
+          }
+        }
+      },
+      "Host_Area_B": {
+        "$className": "Folder",
+        "HostPlatform": {
+          "$className": "Part",
+          "$properties": {
+            "Anchored": true,
+            "Material": "Plastic",
+            "Position": [1130, 0, -620],
+            "Size": [20, 2, 20]
+          }
+        },
+        "HostNPC": {
+          "$className": "Model",
+          "PlaceholderBody": {
+            "$className": "Part",
+            "$properties": {
+              "Anchored": true,
+              "Material": "Plastic",
+              "Color": [1, 0.6, 0],
+              "Position": [1130, 4, -620],
+              "Size": [4, 6, 2]
+            }
+          }
+        }
+      }
+    },
+
+    "Lighting": {
+      "$className": "Lighting",
+      "$properties": {
+        "Ambient": [
+          0,
+          0,
+          0
+        ],
+        "Brightness": 2,
+        "GlobalShadows": true,
+        "Outlines": false,
+        "Technology": "Voxel"
+      }
+    },
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
+  }
+}
