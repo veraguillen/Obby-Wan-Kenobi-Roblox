@@ -193,7 +193,11 @@ local function handleLifeLoss(player: Player, character: Model, isRealDeath: boo
 		-- respawn automatico de Roblox lo manda al unico SpawnLocation del
 		-- juego (Lobby.LobbySpawn). Sin esto, AssignedTrack queda pegado y
 		-- onPortalTouched lo rechaza para siempre al volver a tocar un portal.
+		-- Tambien se resetea el Attribute replicado: RivalCheckpointClient,
+		-- DynamiteButtonClient y DynamiteSabotageSystem lo leen directamente
+		-- y quedarian desincronizados con PlayerDataModule si no se limpia aqui.
 		PlayerDataModule.SetAssignedTrack(player, nil)
+		player:SetAttribute("AssignedTrack", nil)
 	end
 
 	if data.Lives > 1 then
