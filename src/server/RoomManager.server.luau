@@ -152,6 +152,19 @@ local function isWithinRadiusOfAny(position: Vector3, targets: { Vector3 }, radi
 	return false
 end
 
+-- Solo para el print de diagnostico [Queue] de abajo -- no participa de
+-- ninguna decision de remocion (esa sigue siendo isWithinRadiusOfAny).
+local function getNearestDistance(position: Vector3, targets: { Vector3 }): number
+	local nearest = math.huge
+	for _, target in ipairs(targets) do
+		local distance = (position - target).Magnitude
+		if distance < nearest then
+			nearest = distance
+		end
+	end
+	return nearest
+end
+
 local function teleportToStage1(player: Player, trackName: string)
 	local character = player.Character
 	local platform = getStage1Platform(trackName)
@@ -174,6 +187,7 @@ local function buildStatusText(): string
 
 	local ninjaCount = countQueue(ninjaQueue)
 	local cowboyCount = countQueue(cowboyQueue)
+	print(string.format("[Queue] buildStatusText: ninjaCount=%d cowboyCount=%d", ninjaCount, cowboyCount))
 	if ninjaCount == 0 and cowboyCount == 0 then
 		return "Esperando jugadores..."
 	end
@@ -433,6 +447,9 @@ local function onPortalTouched(hit: BasePart, trackName: string)
 		return
 	end
 
+	local queueSizeAfterAdd = countQueue(trackName == "Track_A" and ninjaQueue or cowboyQueue)
+	print(string.format("[Queue] onPortalTouched: %s -> %s (tamano cola=%d)", player.Name, trackName, queueSizeAfterAdd))
+
 	updateDisplays()
 	tryStartCountdown()
 end
@@ -468,6 +485,13 @@ local function checkPlayerPresence(player: Player, portalPositions: { Vector3 },
 	end
 
 	if now - outsideSince >= QUEUE_ABANDON_GRACE_SECONDS then
+		local nearestDistance = getNearestDistance(humanoidRootPart.Position, portalPositions)
+		print(string.format(
+			"[Queue] checkQueuePresence: remueve a %s (fuera %.1fs, distancia al portal mas cercano=%.1f)",
+			player.Name,
+			now - outsideSince,
+			nearestDistance
+		))
 		removePlayerFromQueues(player)
 	end
 end
