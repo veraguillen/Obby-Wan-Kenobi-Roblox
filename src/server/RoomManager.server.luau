@@ -296,6 +296,29 @@ local function onPortalTouched(hit: BasePart, trackName: string)
 	tryStartCountdown()
 end
 
+-- Contraparte de onPortalTouched: si el jugador camina fuera del area del
+-- portal antes de que arranque la ronda (state == "Idle"), lo saca de la
+-- cola para que no quede contando como fantasma. Si ya arranco el
+-- countdown o la carrera, no hace nada -- el jugador ya fue asignado a un
+-- track y removerlo de la cola no aplica.
+local function onPortalTouchEnded(hit: BasePart)
+	local character = hit.Parent
+	if not character then
+		return
+	end
+
+	local player = Players:GetPlayerFromCharacter(character)
+	if not player then
+		return
+	end
+
+	if state ~= "Idle" then
+		return
+	end
+
+	removePlayerFromQueues(player)
+end
+
 -- Conecta cualquier portal del Lobby que tenga un hijo "TouchZone" con el
 -- atributo TargetTrack seteado ("Track_A" / "Track_B"). Soporta N portales
 -- por equipo (multi-sala) sin hardcodear nombres de instancia.
@@ -308,6 +331,7 @@ local function connectPortalTouchZones()
 				touchZone.Touched:Connect(function(hit: BasePart)
 					onPortalTouched(hit, targetTrack :: string)
 				end)
+				touchZone.TouchEnded:Connect(onPortalTouchEnded)
 			end
 		end
 	end
