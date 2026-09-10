@@ -79,7 +79,7 @@ local function platformHasImmunePlayer(platform: BasePart): boolean
 	return false
 end
 
-local function detonate(platform: BasePart)
+local function detonate(platform: BasePart, player: Player)
 	local originalCFrame = platform.CFrame
 	local originalCanCollide = platform.CanCollide
 	local originalTransparency = platform.Transparency
@@ -99,6 +99,7 @@ local function detonate(platform: BasePart)
 
 	if platformHasImmunePlayer(platform) then
 		print("[Dynamite] Branch: platformHasImmunePlayer=true, aborting destruction for " .. platform:GetFullName())
+		DynamiteMessageEvent:FireClient(player, "Objetivo inmune: alguien acaba de reaparecer ahi")
 		return
 	end
 
@@ -112,11 +113,15 @@ end
 local function onActivateRequested(player: Player)
 	if PlayerDataModule.GetAssignedTrack(player) ~= SABOTEUR_TRACK then
 		print("[Dynamite] Branch: rejected, " .. player.Name .. " is not on SABOTEUR_TRACK")
+		DynamiteMessageEvent:FireClient(player, "No podes usar dinamita: no estas en Track_B")
 		return
 	end
 
 	local now = Workspace:GetServerTimeNow()
 	if not DynamiteState.TrySpendCharge(TEAM_COOLDOWN_SECONDS, now) then
+		local reason = if DynamiteState.GetCharges() <= 0 then "sin cargas disponibles" else "en cooldown de equipo"
+		print("[Dynamite] Branch: rejected, " .. player.Name .. " intento activar dinamita " .. reason)
+		DynamiteMessageEvent:FireClient(player, "Dinamita " .. reason)
 		return
 	end
 
@@ -130,6 +135,7 @@ local function onActivateRequested(player: Player)
 	))
 	if not targetPlatform then
 		print("[Dynamite] Branch: targetPlatform is nil, aborting")
+		DynamiteMessageEvent:FireClient(player, "No se encontro objetivo en tu stage actual")
 		return
 	end
 
@@ -140,7 +146,8 @@ local function onActivateRequested(player: Player)
 	end
 
 	print("[Dynamite] Reached detonate() call for " .. targetPlatform:GetFullName())
-	task.spawn(detonate, targetPlatform)
+	DynamiteMessageEvent:FireClient(player, string.format("Detonando Stage_%d Platform en %s", myStage, TARGET_TRACK))
+	task.spawn(detonate, targetPlatform, player)
 end
 
 DynamiteActivateEvent.OnServerEvent:Connect(onActivateRequested)

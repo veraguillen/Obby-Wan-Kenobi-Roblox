@@ -308,7 +308,7 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [0, 0, 0],
+              "Position": [0, 16, 0],
               "Size": [450, 4, 150]
             }
           },
@@ -414,7 +414,7 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [0, 0, 200],
+              "Position": [0, 16, 200],
               "Size": [450, 4, 150]
             }
           },
@@ -497,7 +497,7 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [0, 0, 400],
+              "Position": [0, 16, 400],
               "Size": [450, 4, 150]
             }
           },
@@ -580,7 +580,7 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [0, 0, 600],
+              "Position": [0, 16, 600],
               "Size": [450, 4, 150]
             }
           },
@@ -663,7 +663,7 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [0, 0, 800],
+              "Position": [0, 16, 800],
               "Size": [450, 4, 150]
             }
           },
@@ -749,7 +749,7 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [1000, 0, 0],
+              "Position": [1000, 16, 0],
               "Size": [450, 4, 150]
             }
           },
@@ -855,7 +855,7 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [1000, 0, 200],
+              "Position": [1000, 16, 200],
               "Size": [450, 4, 150]
             }
           },
@@ -938,7 +938,7 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [1000, 0, 400],
+              "Position": [1000, 16, 400],
               "Size": [450, 4, 150]
             }
           },
@@ -1021,7 +1021,7 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [1000, 0, 600],
+              "Position": [1000, 16, 600],
               "Size": [450, 4, 150]
             }
           },
@@ -1104,7 +1104,7 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [1000, 0, 800],
+              "Position": [1000, 16, 800],
               "Size": [450, 4, 150]
             }
           },
