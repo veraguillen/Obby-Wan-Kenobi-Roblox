@@ -32,6 +32,25 @@ local Lobby = Workspace:WaitForChild("Lobby")
 local COUNTDOWN_SECONDS = 10
 local LANDING_HEIGHT_OFFSET = 4
 
+-- Polling de presencia en cola (reemplaza el viejo TouchEnded del portal,
+-- que disparaba en ~0.3s al cruzar el TouchZone de 1 stud caminando a
+-- WalkSpeed normal -- ver DEFAULT_WALK_SPEED en RescueSystem.luau -- y
+-- vaciaba la cola de jugadores que segun caminando con normalidad).
+-- Mismo intervalo de chequeo que usa CheckpointSystem.server.luau
+-- (POSITION_CHECK_INTERVAL) para su propio polling de posicion.
+local QUEUE_PRESENCE_CHECK_INTERVAL = 0.5
+-- Los 5 portales de cada equipo estan alineados en Lobby (default.project.
+-- json) separados 100 studs entre si (ej. Portal_Ninja_1..5 en Z = -1100,
+-- -1000, -900, -800, -700, mismo X). 60 = mitad de esa separacion (50) mas
+-- un margen de 10 studs, asi el radio de un portal cubre sin huecos el
+-- punto medio hacia el portal vecino. Se queda comodo dentro del Lobby: el
+-- portal ninja mas cercano al muro oeste (X=300) tiene el muro 101 studs
+-- mas alla (Wall_West en X=199), y el LobbySpawn (X=500) esta a 200 studs
+-- de cualquier portal ninja/cowboy -- 60 nunca llega a cruzar hacia el
+-- spawn ni hacia el equipo rival.
+local QUEUE_PRESENCE_RADIUS = 60
+local QUEUE_ABANDON_GRACE_SECONDS = 2
+
 -- DEBUG: solo en Studio (nunca en el juego publicado) permitia arrancar la
 -- cuenta regresiva sin rival real, para poder probar el flujo jugando solo/a.
 -- Desactivado: se requiere siempre emparejamiento balanceado real, igual que
@@ -49,6 +68,11 @@ local ninjaQueue: { [Player]: boolean } = {}
 local cowboyQueue: { [Player]: boolean } = {}
 local remainingSeconds = COUNTDOWN_SECONDS
 local countdownThread: thread? = nil
+
+-- Desde cuando (Workspace:GetServerTimeNow()) un jugador en cola esta fuera
+-- del radio de todos los portales de su lado, de forma sostenida. nil =
+-- esta dentro del radio (o no se le esta trackeando ahora mismo).
+local queueOutsideSince: { [Player]: number } = {}
 
 local function countQueue(queue: { [Player]: boolean }): number
 	local count = 0
@@ -76,6 +100,33 @@ local function getStartBarrier(trackName: string): BasePart?
 		return barrier
 	end
 	return nil
+end
+
+-- Posiciones (en el mundo) de los TouchZone de todos los portales de un
+-- lado (ninja/cowboy). Se calcula una sola vez al arrancar: los portales
+-- son geometria estatica de default.project.json (Anchored = true), no se
+-- mueven en runtime.
+local function getPortalPositionsForTrack(trackName: string): { Vector3 }
+	local positions: { Vector3 } = {}
+	for _, portal in ipairs(Lobby:GetChildren()) do
+		local touchZone = portal:FindFirstChild("TouchZone")
+		if touchZone and touchZone:IsA("BasePart") and touchZone:GetAttribute("TargetTrack") == trackName then
+			table.insert(positions, touchZone.Position)
+		end
+	end
+	return positions
+end
+
+local ninjaPortalPositions = getPortalPositionsForTrack("Track_A")
+local cowboyPortalPositions = getPortalPositionsForTrack("Track_B")
+
+local function isWithinRadiusOfAny(position: Vector3, targets: { Vector3 }, radius: number): boolean
+	for _, target in ipairs(targets) do
+		if (position - target).Magnitude <= radius then
+			return true
+		end
+	end
+	return false
 end
 
 local function teleportToStage1(player: Player, trackName: string)
@@ -244,6 +295,7 @@ removePlayerFromQueues = function(player: Player)
 	local wasQueued = ninjaQueue[player] or cowboyQueue[player]
 	ninjaQueue[player] = nil
 	cowboyQueue[player] = nil
+	queueOutsideSince[player] = nil
 
 	if not wasQueued then
 		return
@@ -296,27 +348,55 @@ local function onPortalTouched(hit: BasePart, trackName: string)
 	tryStartCountdown()
 end
 
--- Contraparte de onPortalTouched: si el jugador camina fuera del area del
--- portal antes de que arranque la ronda (state == "Idle"), lo saca de la
--- cola para que no quede contando como fantasma. Si ya arranco el
--- countdown o la carrera, no hace nada -- el jugador ya fue asignado a un
--- track y removerlo de la cola no aplica.
-local function onPortalTouchEnded(hit: BasePart)
-	local character = hit.Parent
+-- Contraparte de onPortalTouched: mientras la ronda no arranco (state ==
+-- "Idle"), vigila por polling (no por TouchEnded -- ver comentario de
+-- QUEUE_PRESENCE_CHECK_INTERVAL mas arriba: el TouchZone es un gate de 1
+-- stud que cualquier caminata normal cruza en fracciones de segundo, asi
+-- que TouchEnded disparaba con jugadores que jamas se habian ido) si algun
+-- jugador en cola se alejo mas de QUEUE_PRESENCE_RADIUS de TODOS los
+-- portales de su lado, sostenido por QUEUE_ABANDON_GRACE_SECONDS. Recien
+-- ahi lo saca de la cola -- tolera pasar caminando cerca de mas de un
+-- portal del mismo lado sin ser expulsado.
+local function checkPlayerPresence(player: Player, portalPositions: { Vector3 }, now: number)
+	local character = player.Character
 	if not character then
 		return
 	end
-
-	local player = Players:GetPlayerFromCharacter(character)
-	if not player then
+	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not humanoidRootPart then
 		return
 	end
 
+	if isWithinRadiusOfAny(humanoidRootPart.Position, portalPositions, QUEUE_PRESENCE_RADIUS) then
+		queueOutsideSince[player] = nil
+		return
+	end
+
+	local outsideSince = queueOutsideSince[player]
+	if not outsideSince then
+		queueOutsideSince[player] = now
+		return
+	end
+
+	if now - outsideSince >= QUEUE_ABANDON_GRACE_SECONDS then
+		removePlayerFromQueues(player)
+	end
+end
+
+local function checkQueuePresence()
 	if state ~= "Idle" then
+		table.clear(queueOutsideSince)
 		return
 	end
 
-	removePlayerFromQueues(player)
+	local now = Workspace:GetServerTimeNow()
+
+	for player in pairs(ninjaQueue) do
+		checkPlayerPresence(player, ninjaPortalPositions, now)
+	end
+	for player in pairs(cowboyQueue) do
+		checkPlayerPresence(player, cowboyPortalPositions, now)
+	end
 end
 
 -- Conecta cualquier portal del Lobby que tenga un hijo "TouchZone" con el
@@ -331,13 +411,19 @@ local function connectPortalTouchZones()
 				touchZone.Touched:Connect(function(hit: BasePart)
 					onPortalTouched(hit, targetTrack :: string)
 				end)
-				touchZone.TouchEnded:Connect(onPortalTouchEnded)
 			end
 		end
 	end
 end
 
 connectPortalTouchZones()
+
+task.spawn(function()
+	while true do
+		task.wait(QUEUE_PRESENCE_CHECK_INTERVAL)
+		checkQueuePresence()
+	end
+end)
 
 Players.PlayerRemoving:Connect(removePlayerFromQueues)
 
