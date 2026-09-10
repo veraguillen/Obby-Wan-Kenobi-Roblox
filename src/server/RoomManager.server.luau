@@ -32,10 +32,15 @@ local Lobby = Workspace:WaitForChild("Lobby")
 local COUNTDOWN_SECONDS = 10
 local LANDING_HEIGHT_OFFSET = 4
 
--- DEBUG: solo en Studio (nunca en el juego publicado) permite arrancar la
+-- DEBUG: solo en Studio (nunca en el juego publicado) permitia arrancar la
 -- cuenta regresiva sin rival real, para poder probar el flujo jugando solo/a.
--- Borrar este bloque + su uso en tryStartCountdown cuando ya no haga falta.
-local ALLOW_SOLO_DEBUG_START = RunService:IsStudio()
+-- Desactivado: se requiere siempre emparejamiento balanceado real, igual que
+-- en el juego publicado (tryStartCountdown exige teamsBalanced sin excepcion
+-- para Studio). Para testear en solitario, revertir puntualmente a
+-- RunService:IsStudio() (linea comentada abajo) y volver a desactivar antes
+-- de testear multijugador.
+local ALLOW_SOLO_DEBUG_START = false
+-- local ALLOW_SOLO_DEBUG_START = RunService:IsStudio()
 
 type RoomState = "Idle" | "Countdown" | "InGame"
 
