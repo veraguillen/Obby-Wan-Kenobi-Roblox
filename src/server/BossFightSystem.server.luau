@@ -1,15 +1,20 @@
 --!strict
 -- Version MVP del jefe (1 fase, 1 barra de vida, 1 ataque) para validar el
 -- loop de combate. El equipo gana golpeando el nucleo directamente. El
--- unico ataque es una onda expansiva que empuja a los jugadores cercanos
--- hacia afuera; Boss_Arena no tiene muros perimetrales, asi que un empujon
--- fuerte puede sacarlos de la plataforma al vacio, donde el monitor de
--- caida ya existente (CheckpointSystem.server.luau) se encarga del respawn
--- sin necesitar logica nueva aqui.
+-- unico ataque es una onda expansiva: en vez de un empujon fisico fuerte
+-- (que podia sacar al jugador de la plataforma al vacio por Boss_Arena no
+-- tener muros perimetrales -- problema de balance ya señalado), ser
+-- alcanzado por la onda llama a RescueSystem.KnockDown, que lo derriba en el
+-- lugar (12-15s recuperable por un companero o por cuerda de equipo) sin
+-- moverlo de la arena.
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Workspace = game:GetService("Workspace")
+
+local PlayerDataModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("PlayerDataModule"))
+local RescueSystem = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("RescueSystem"))
 
 local RoomManagerScript = ServerScriptService:WaitForChild("Server"):WaitForChild("RoomManager")
 local RoundStarted = RoomManagerScript:WaitForChild("RoundStarted") :: BindableEvent
@@ -28,9 +33,6 @@ local WARNING_DURATION_SECONDS = 1.75
 local WARNING_PULSE_INTERVAL = 0.2
 local WARNING_COLOR = Color3.new(1, 1, 1)
 local SHOCKWAVE_RADIUS = 70
-local KNOCKBACK_HORIZONTAL_SPEED = 85
-local KNOCKBACK_VERTICAL_SPEED = 35
-local KNOCKBACK_DURATION_SECONDS = 0.4
 
 local originalCoreColor = BossCore.Color
 local bossHealth = BOSS_MAX_HEALTH
@@ -67,6 +69,13 @@ local function onCoreTouched(hit: BasePart)
 		return
 	end
 
+	-- Un jugador derribado (RescueSystem.KnockDown) queda inmovil con
+	-- PlatformStand=true cerca del nucleo: su fisica suelta puede tocarlo
+	-- por accidente sin que nadie lo ataque a proposito. No cuenta como hit.
+	if PlayerDataModule.IsDowned(player) then
+		return
+	end
+
 	if hitDebounce[player.UserId] then
 		return
 	end
@@ -85,24 +94,6 @@ end
 
 BossCore.Touched:Connect(onCoreTouched)
 
-local function applyKnockback(humanoidRootPart: BasePart)
-	local direction = humanoidRootPart.Position - BossCore.Position
-	direction = Vector3.new(direction.X, 0, direction.Z)
-	if direction.Magnitude < 0.01 then
-		direction = Vector3.new(1, 0, 0)
-	else
-		direction = direction.Unit
-	end
-
-	local bodyVelocity = Instance.new("BodyVelocity")
-	bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-	bodyVelocity.Velocity = direction * KNOCKBACK_HORIZONTAL_SPEED + Vector3.new(0, KNOCKBACK_VERTICAL_SPEED, 0)
-	bodyVelocity.Parent = humanoidRootPart
-	task.delay(KNOCKBACK_DURATION_SECONDS, function()
-		bodyVelocity:Destroy()
-	end)
-end
-
 local function executeShockwave()
 	for _, player in ipairs(Players:GetPlayers()) do
 		local character = player.Character
@@ -110,7 +101,7 @@ local function executeShockwave()
 		if humanoidRootPart and humanoidRootPart:IsA("BasePart") then
 			local distance = (humanoidRootPart.Position - BossCore.Position).Magnitude
 			if distance <= SHOCKWAVE_RADIUS then
-				applyKnockback(humanoidRootPart)
+				RescueSystem.KnockDown(player)
 			end
 		end
 	end

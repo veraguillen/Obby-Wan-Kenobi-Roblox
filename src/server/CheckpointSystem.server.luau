@@ -9,9 +9,18 @@ local Workspace = game:GetService("Workspace")
 local PlayerDataModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("PlayerDataModule"))
 
 local DynamiteState = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("DynamiteState"))
+local LifeLossModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("LifeLossModule"))
 
 local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local CheckpointProgressEvent = RemoteEvents:WaitForChild("CheckpointProgressEvent") :: RemoteEvent
+
+-- Señal server-only (no replica al cliente) para que otros sistemas (ej.
+-- RescueSystem.server.luau) sepan cuando el equipo avanzo de checkpoint,
+-- sin que CheckpointSystem conozca ni dependa de ellos. Mismo patron que
+-- RoundStarted en RoomManager.server.luau.
+local CheckpointReached = Instance.new("BindableEvent")
+CheckpointReached.Name = "CheckpointReached"
+CheckpointReached.Parent = script
 
 local LANDING_HEIGHT_OFFSET = 4
 local FALL_THRESHOLD_Y = -20
@@ -128,6 +137,7 @@ local function onCheckpointTouched(pad: BasePart, hit: BasePart)
 		flashCheckpointPad(pad)
 		advanceCharacterToNextStage(character :: Model, padTrack, stageNumber)
 		CheckpointProgressEvent:FireAllClients(padTrack, stageNumber, LAST_STAGE_NUMBER)
+		CheckpointReached:Fire(padTrack, stageNumber, checkpointCFrame)
 		player:SetAttribute("HasReachedFirstCheckpoint", true)
 		if padTrack == "Track_B" then
 			DynamiteState.AddCharge()
@@ -150,70 +160,10 @@ connectCheckpointPads(Workspace:WaitForChild("Track_A"))
 connectCheckpointPads(Workspace:WaitForChild("Track_B"))
 
 -- ===== Caida al vacio / muerte =====
-
-local function respawnAtStage1(character: Model, player: Player)
-	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-	if not humanoidRootPart then
-		return
-	end
-
-	local trackName = PlayerDataModule.GetAssignedTrack(player)
-	if not trackName then
-		local lobbySpawn = Workspace:FindFirstChild("Lobby") and Workspace.Lobby:FindFirstChild("LobbySpawn")
-		if lobbySpawn and lobbySpawn:IsA("BasePart") then
-			character:PivotTo(lobbySpawn.CFrame)
-		end
-		return
-	end
-
-	local platform = getStagePlatform(trackName, 1)
-	if platform then
-		character:PivotTo(CFrame.new(platform.Position + Vector3.new(0, LANDING_HEIGHT_OFFSET, 0)))
-	end
-end
-
-local function respawnAtCheckpoint(character: Model, checkpointCFrame: CFrame)
-	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-	if not humanoidRootPart then
-		return
-	end
-	character:PivotTo(checkpointCFrame)
-end
-
-local function handleLifeLoss(player: Player, character: Model, isRealDeath: boolean)
-	local data = PlayerDataModule.GetPlayerData(player)
-	if not data then
-		return
-	end
-
-	player:SetAttribute("LastRespawnTime", Workspace:GetServerTimeNow())
-
-	if isRealDeath then
-		-- Humanoid.Died deja el personaje muerto: PivotTo no lo revive, y el
-		-- respawn automatico de Roblox lo manda al unico SpawnLocation del
-		-- juego (Lobby.LobbySpawn). Sin esto, AssignedTrack queda pegado y
-		-- onPortalTouched lo rechaza para siempre al volver a tocar un portal.
-		-- Tambien se resetea el Attribute replicado: RivalCheckpointClient,
-		-- DynamiteButtonClient y DynamiteSabotageSystem lo leen directamente
-		-- y quedarian desincronizados con PlayerDataModule si no se limpia aqui.
-		PlayerDataModule.SetAssignedTrack(player, nil)
-		player:SetAttribute("AssignedTrack", nil)
-	end
-
-	if data.Lives > 1 then
-		PlayerDataModule.SetLives(player, data.Lives - 1)
-		local checkpointCFrame = PlayerDataModule.GetLastCheckpointCFrame(player)
-		if checkpointCFrame then
-			respawnAtCheckpoint(character, checkpointCFrame)
-		else
-			respawnAtStage1(character, player)
-		end
-	else
-		PlayerDataModule.SetLives(player, data.MaxLives)
-		PlayerDataModule.SetCheckpoint(player, 1, nil)
-		respawnAtStage1(character, player)
-	end
-end
+-- La logica de restar vida + reaparecer vive en LifeLossModule.luau (la
+-- reusa tambien RescueSystem.server.luau al gastar una cuerda de rescate),
+-- pero la deteccion (Humanoid.Died / caida al vacio) sigue exactamente igual
+-- que antes.
 
 local function monitorCharacter(player: Player, character: Model)
 	local isProcessingRespawn = false
@@ -223,7 +173,7 @@ local function monitorCharacter(player: Player, character: Model)
 			return
 		end
 		isProcessingRespawn = true
-		handleLifeLoss(player, character, isRealDeath)
+		LifeLossModule.HandleLifeLoss(player, character, isRealDeath)
 		isProcessingRespawn = false
 	end
 

@@ -11,6 +11,9 @@ export type PlayerData = {
 	CurrentStage: number,
 	LastCheckpointCFrame: CFrame?,
 	AssignedTrack: string?,
+	IsDowned: boolean,
+	DownedUntil: number?,
+	IsWaitingForCheckpoint: boolean,
 }
 
 local PlayerDataModule = {}
@@ -28,6 +31,9 @@ local function copyData(data: PlayerData): PlayerData
 		CurrentStage = data.CurrentStage,
 		LastCheckpointCFrame = data.LastCheckpointCFrame,
 		AssignedTrack = data.AssignedTrack,
+		IsDowned = data.IsDowned,
+		DownedUntil = data.DownedUntil,
+		IsWaitingForCheckpoint = data.IsWaitingForCheckpoint,
 	}
 end
 
@@ -43,6 +49,9 @@ function PlayerDataModule.InitializePlayer(player: Player): PlayerData?
 		CurrentStage = 1,
 		LastCheckpointCFrame = nil,
 		AssignedTrack = nil,
+		IsDowned = false,
+		DownedUntil = nil,
+		IsWaitingForCheckpoint = false,
 	}
 	playerData[player.UserId] = data
 	return copyData(data)
@@ -71,6 +80,46 @@ end
 function PlayerDataModule.GetAssignedTrack(player: Player): string?
 	local data = playerData[player.UserId]
 	return data and data.AssignedTrack or nil
+end
+
+function PlayerDataModule.SetDownedState(player: Player, isDowned: boolean, downedUntil: number?)
+	if not isServer() then
+		warn("PlayerDataModule.SetDownedState must be called from the server")
+		return
+	end
+	local data = playerData[player.UserId]
+	if not data then
+		return
+	end
+	data.IsDowned = isDowned
+	data.DownedUntil = downedUntil
+end
+
+function PlayerDataModule.IsDowned(player: Player): boolean
+	local data = playerData[player.UserId]
+	return data ~= nil and data.IsDowned
+end
+
+function PlayerDataModule.GetDownedUntil(player: Player): number?
+	local data = playerData[player.UserId]
+	return data and data.DownedUntil or nil
+end
+
+function PlayerDataModule.SetWaitingForCheckpoint(player: Player, isWaiting: boolean)
+	if not isServer() then
+		warn("PlayerDataModule.SetWaitingForCheckpoint must be called from the server")
+		return
+	end
+	local data = playerData[player.UserId]
+	if not data then
+		return
+	end
+	data.IsWaitingForCheckpoint = isWaiting
+end
+
+function PlayerDataModule.IsWaitingForCheckpoint(player: Player): boolean
+	local data = playerData[player.UserId]
+	return data ~= nil and data.IsWaitingForCheckpoint
 end
 
 function PlayerDataModule.SetCheckpoint(player: Player, stage: number, cframe: CFrame?)
