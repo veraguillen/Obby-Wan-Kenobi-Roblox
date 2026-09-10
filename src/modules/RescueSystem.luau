@@ -57,6 +57,7 @@ local CheckpointReached = CheckpointSystemScript:WaitForChild("CheckpointReached
 local DOWN_DURATION_SECONDS = 13
 local REVIVE_HOLD_SECONDS = 3
 local COUNTDOWN_TICK_SECONDS = 0.5
+local WAITING_FOR_CHECKPOINT_TIMEOUT_SECONDS = 30
 local DEFAULT_WALK_SPEED = 16
 local DEFAULT_JUMP_POWER = 50
 local DEFAULT_JUMP_HEIGHT = 7.2
@@ -68,6 +69,11 @@ local RescueSystem = {}
 -- una ronda nueva, o se lo vuelve a derribar (no deberia pasar, pero por las
 -- dudas queda protegido por token en vez de por bandera simple).
 local downTokens: { [Player]: number } = {}
+
+-- Mismo patron de token que downTokens, pero para WaitingForCheckpoint:
+-- permite que CheckpointReached y el timeout de 30s de abajo se invaliden
+-- mutuamente -- el primero de los dos que libera al jugador gana.
+local waitTokens: { [Player]: number } = {}
 
 local function restoreMovement(humanoid: Humanoid)
 	humanoid.WalkSpeed = DEFAULT_WALK_SPEED
@@ -248,12 +254,45 @@ function RescueSystem.KnockDown(player: Player)
 				currentHumanoid.PlatformStand = false
 			end
 		end
+
+		-- Failsafe: si el jugador es el unico de su equipo (1v1, o el resto
+		-- tambien cayo), CheckpointReached nunca va a disparar para su track y
+		-- quedaria congelado para siempre. A los 30s lo libera igual, sin
+		-- cuerda ni companero, al ultimo checkpoint que ya tenia guardado
+		-- (misma fuente que usa el camino normal -- PlayerDataModule.
+		-- GetLastCheckpointCFrame). Si CheckpointReached ya lo libero antes,
+		-- waitTokens no coincide o IsWaitingForCheckpoint ya es false, y esto
+		-- no hace nada.
+		local myWaitToken = (waitTokens[player] or 0) + 1
+		waitTokens[player] = myWaitToken
+		task.delay(WAITING_FOR_CHECKPOINT_TIMEOUT_SECONDS, function()
+			if waitTokens[player] ~= myWaitToken or not PlayerDataModule.IsWaitingForCheckpoint(player) then
+				return
+			end
+
+			PlayerDataModule.SetWaitingForCheckpoint(player, false)
+			player:SetAttribute("IsWaitingForCheckpoint", false)
+			player:SetAttribute("LastRespawnTime", Workspace:GetServerTimeNow())
+
+			local fallbackCharacter = player.Character
+			if fallbackCharacter then
+				local fallbackCFrame = PlayerDataModule.GetLastCheckpointCFrame(player)
+				if fallbackCFrame then
+					fallbackCharacter:PivotTo(fallbackCFrame)
+				end
+				local fallbackHumanoid = fallbackCharacter:FindFirstChildOfClass("Humanoid")
+				if fallbackHumanoid then
+					restoreMovement(fallbackHumanoid)
+				end
+			end
+		end)
 	end)
 end
 
 CheckpointReached.Event:Connect(function(trackName: string, stageNumber: number, checkpointCFrame: CFrame)
 	for _, player in ipairs(Players:GetPlayers()) do
 		if PlayerDataModule.GetAssignedTrack(player) == trackName and PlayerDataModule.IsWaitingForCheckpoint(player) then
+			waitTokens[player] = (waitTokens[player] or 0) + 1
 			PlayerDataModule.SetWaitingForCheckpoint(player, false)
 			player:SetAttribute("IsWaitingForCheckpoint", false)
 			PlayerDataModule.SetCheckpoint(player, stageNumber, checkpointCFrame)
