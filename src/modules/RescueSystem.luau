@@ -143,6 +143,26 @@ local function clearDowned(player: Player, character: Model?)
 	end
 end
 
+-- Limpia el estado de rescate de UN jugador (derribado + esperando
+-- checkpoint), incluyendo el bump de downTokens que invalida cualquier
+-- hilo de KnockDown en vuelo -- sin eso, ese hilo seguiria corriendo su
+-- propio countdown/transicion a "esperando checkpoint" en paralelo y
+-- podria pisar este reset un instante despues. Exportada (no local, como
+-- clearDowned) porque RoomManager.server.luau necesita la misma limpieza
+-- en endRound(), no solo aca en RoundStarted -- ver comentario ahi.
+function RescueSystem.ClearPlayerRescueState(player: Player)
+	downTokens[player] = (downTokens[player] or 0) + 1
+
+	if PlayerDataModule.IsWaitingForCheckpoint(player) then
+		PlayerDataModule.SetWaitingForCheckpoint(player, false)
+		player:SetAttribute("IsWaitingForCheckpoint", false)
+	end
+
+	if PlayerDataModule.IsDowned(player) then
+		clearDowned(player, player.Character)
+	end
+end
+
 function RescueSystem.KnockDown(player: Player)
 	local character = player.Character
 	if not character then
@@ -313,16 +333,7 @@ end)
 RoundStarted.Event:Connect(function()
 	RescueState.ResetCords()
 	for _, player in ipairs(Players:GetPlayers()) do
-		downTokens[player] = (downTokens[player] or 0) + 1
-
-		if PlayerDataModule.IsWaitingForCheckpoint(player) then
-			PlayerDataModule.SetWaitingForCheckpoint(player, false)
-			player:SetAttribute("IsWaitingForCheckpoint", false)
-		end
-
-		if PlayerDataModule.IsDowned(player) then
-			clearDowned(player, player.Character)
-		end
+		RescueSystem.ClearPlayerRescueState(player)
 	end
 end)
 

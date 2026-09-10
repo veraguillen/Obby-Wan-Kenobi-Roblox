@@ -12,6 +12,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ServerScriptService = game:GetService("ServerScriptService")
 local Workspace = game:GetService("Workspace")
 
 local PlayerDataModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("PlayerDataModule"))
@@ -27,10 +28,25 @@ local RoundStarted = Instance.new("BindableEvent")
 RoundStarted.Name = "RoundStarted"
 RoundStarted.Parent = script
 
+-- Señal de fin de ronda por victoria: RoomManager no conoce el combate
+-- contra el jefe, solo escucha este BindableEvent (mismo patron inverso que
+-- RoundStarted) para saber cuando puede volver a abrir la sala.
+local BossFightSystemScript = ServerScriptService:WaitForChild("Server"):WaitForChild("BossFightSystem")
+local BossDefeated = BossFightSystemScript:WaitForChild("BossDefeated") :: BindableEvent
+
+-- Requerido para RescueSystem.ClearPlayerRescueState en endRound() (ver mas
+-- abajo). IMPORTANTE: este require debe quedar DESPUES de que RoundStarted
+-- ya fue creado arriba -- RescueSystem.luau espera (WaitForChild) por esa
+-- misma instancia al cargar por primera vez, y si este require corriera
+-- antes de la creacion de RoundStarted se trabaria en un deadlock (este
+-- mismo script, bloqueado esperandose a si mismo).
+local RescueSystem = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("RescueSystem"))
+
 local Lobby = Workspace:WaitForChild("Lobby")
 
 local COUNTDOWN_SECONDS = 10
 local LANDING_HEIGHT_OFFSET = 4
+local ROUND_TIMEOUT_SECONDS = 20 * 60
 
 -- Polling de presencia en cola (reemplaza el viejo TouchEnded del portal,
 -- que disparaba en ~0.3s al cruzar el TouchZone de 1 stud caminando a
@@ -68,6 +84,13 @@ local ninjaQueue: { [Player]: boolean } = {}
 local cowboyQueue: { [Player]: boolean } = {}
 local remainingSeconds = COUNTDOWN_SECONDS
 local countdownThread: thread? = nil
+
+-- Jugadores que entraron a la ronda actualmente "InGame" (copia de
+-- ninjaQueue/cowboyQueue tomada en launchRace, antes de vaciarlas). Mientras
+-- este roster no quede vacio por una de las 3 vias de fin de ronda, state se
+-- mantiene en "InGame" y no se puede arrancar una cuenta regresiva nueva.
+local roundRoster: { [Player]: boolean } = {}
+local roundTimeoutThread: thread? = nil
 
 -- Desde cuando (Workspace:GetServerTimeNow()) un jugador en cola esta fuera
 -- del radio de todos los portales de su lado, de forma sostenida. nil =
@@ -172,6 +195,7 @@ local tryStartCountdown: () -> ()
 local launchRace: () -> ()
 local cancelCountdown: () -> ()
 local removePlayerFromQueues: (Player) -> ()
+local endRound: () -> ()
 
 updateDisplays = function()
 	local text = buildStatusText()
@@ -193,6 +217,13 @@ end
 -- false) durante todo el recorrido de la carrera. NO deben volver a cerrarse
 -- aqui: solo se re-arman (CanCollide = true) en tryStartCountdown, al iniciar
 -- la cuenta regresiva de la siguiente ronda.
+--
+-- state se queda en "InGame" -- ya NO vuelve a "Idle" aca. Antes lo hacia de
+-- forma sincronica en esta misma funcion, lo que dejaba la sala lista para
+-- una cuenta regresiva nueva mientras la carrera recien arrancada seguia en
+-- curso (RoundStarted espurio, contaminaba derribo/espera de la carrera
+-- viva). Ahora la sala solo vuelve a "Idle" via endRound(), en alguna de las
+-- 3 condiciones de fin de ronda.
 launchRace = function()
 	state = "InGame"
 	remainingSeconds = 0
@@ -210,18 +241,63 @@ launchRace = function()
 		barrierB.Transparency = 1
 	end
 
+	table.clear(roundRoster)
 	for player in pairs(ninjaQueue) do
+		roundRoster[player] = true
 		RoomStatusEvent:FireClient(player, "", false)
 	end
 	for player in pairs(cowboyQueue) do
+		roundRoster[player] = true
 		RoomStatusEvent:FireClient(player, "", false)
 	end
 
 	table.clear(ninjaQueue)
 	table.clear(cowboyQueue)
-	state = "Idle"
 	remainingSeconds = COUNTDOWN_SECONDS
 	countdownThread = nil
+	updateDisplays()
+
+	if roundTimeoutThread then
+		task.cancel(roundTimeoutThread)
+	end
+	roundTimeoutThread = task.delay(ROUND_TIMEOUT_SECONDS, function()
+		roundTimeoutThread = nil
+		endRound()
+	end)
+end
+
+-- Termina la ronda "InGame" actual por cualquiera de las 3 vias (jefe
+-- derrotado, roster vacio por desconexion total, o timeout de seguridad) y
+-- deja la sala lista para una cuenta regresiva nueva. Idempotente: si ya no
+-- hay ronda activa (state ~= "InGame"), no hace nada -- evita doble reset si
+-- dos condiciones de fin de ronda se disparan casi juntas.
+endRound = function()
+	if state ~= "InGame" then
+		return
+	end
+
+	if roundTimeoutThread then
+		task.cancel(roundTimeoutThread)
+		roundTimeoutThread = nil
+	end
+
+	for player in pairs(roundRoster) do
+		PlayerDataModule.SetAssignedTrack(player, nil)
+		player:SetAttribute("AssignedTrack", nil)
+		-- Sin esto, un jugador que sigue derribado/esperando checkpoint
+		-- cuando termina la ronda (jefe derrotado, timeout, o el resto del
+		-- equipo se desconecto) arrastraba ese estado hasta el proximo
+		-- RoundStarted -- y si el mismo se desconectaba y reconectaba en el
+		-- medio, lo arrastraba mas alla de eso tambien (ver
+		-- PlayerDataModule.CleanupPlayer mas abajo). Mismo reset que ya
+		-- hace RescueSystem en su propio listener de RoundStarted, al
+		-- arrancar la ronda siguiente -- esto lo hace tambien al cerrar
+		-- esta.
+		RescueSystem.ClearPlayerRescueState(player)
+	end
+	table.clear(roundRoster)
+
+	state = "Idle"
 	updateDisplays()
 end
 
@@ -292,6 +368,19 @@ cancelCountdown = function()
 end
 
 removePlayerFromQueues = function(player: Player)
+	-- Via (b) de fin de ronda: si el que se desconecta formaba parte del
+	-- roster de la ronda "InGame" actual, sacarlo; si eso deja el roster
+	-- vacio, ya no queda nadie corriendo la pista y la ronda termina.
+	-- Independiente del chequeo de wasQueued de abajo -- una vez que la
+	-- carrera arranca, los jugadores ya no estan en ninjaQueue/cowboyQueue
+	-- (launchRace las vacia), solo en roundRoster.
+	if roundRoster[player] then
+		roundRoster[player] = nil
+		if next(roundRoster) == nil then
+			endRound()
+		end
+	end
+
 	local wasQueued = ninjaQueue[player] or cowboyQueue[player]
 	ninjaQueue[player] = nil
 	cowboyQueue[player] = nil
@@ -425,6 +514,30 @@ task.spawn(function()
 	end
 end)
 
+-- Via (a) de fin de ronda: el jefe fue derrotado.
+BossDefeated.Event:Connect(endRound)
+
 Players.PlayerRemoving:Connect(removePlayerFromQueues)
+
+-- Sin esto, playerData[player.UserId] (PlayerDataModule.luau) nunca se
+-- borraba al desconectarse -- si el mismo jugador (mismo UserId real de
+-- Roblox) volvia a entrar, heredaba integro su estado viejo (AssignedTrack,
+-- IsDowned, IsWaitingForCheckpoint, etc.), porque onPortalTouched solo
+-- llama PlayerDataModule.InitializePlayer cuando GetPlayerData no encuentra
+-- nada. Con el leak, "nada" nunca pasaba.
+Players.PlayerRemoving:Connect(function(player: Player)
+	PlayerDataModule.CleanupPlayer(player)
+end)
+
+-- PENDIENTE (fuera de alcance de este fix): hoy el modelo es de una sola
+-- ronda global a la vez -- un unico Track_A/Track_B/Boss_Arena/DynamiteState/
+-- RescueState singleton, con un unico roundRoster/state en este script. Los
+-- 5 portales por equipo (via ServerIndex en default.project.json) ya
+-- soportan multiples puntos de entrada a la MISMA cola, no salas paralelas
+-- independientes. Soportar rondas realmente simultaneas (multi-sala)
+-- requiere instanciar Track_A/Track_B/Boss_Arena por sesion y volver
+-- DynamiteState/RescueState/BossFightSystem keyed por sesion -- cambio de
+-- arquitectura mayor, a encarar recien cuando se observe en la practica que
+-- jugadores reales esperan por una sala ocupada, no antes.
 
 updateDisplays()

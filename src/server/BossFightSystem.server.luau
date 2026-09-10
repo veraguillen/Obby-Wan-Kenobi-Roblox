@@ -19,6 +19,15 @@ local RescueSystem = require(ReplicatedStorage:WaitForChild("Modules"):WaitForCh
 local RoomManagerScript = ServerScriptService:WaitForChild("Server"):WaitForChild("RoomManager")
 local RoundStarted = RoomManagerScript:WaitForChild("RoundStarted") :: BindableEvent
 
+-- Señal server-only (no replica al cliente) para que otros sistemas (ej.
+-- RoomManager.server.luau) sepan cuando el jefe fue derrotado, sin que
+-- BossFightSystem conozca ni dependa de ellos. Mismo patron que
+-- RoundStarted en RoomManager.server.luau y CheckpointReached en
+-- CheckpointSystem.server.luau.
+local BossDefeated = Instance.new("BindableEvent")
+BossDefeated.Name = "BossDefeated"
+BossDefeated.Parent = script
+
 local BossArena = Workspace:WaitForChild("Boss_Arena")
 local BossCore = BossArena:WaitForChild("Boss_Core") :: BasePart
 local HealthBarGui = BossCore:WaitForChild("HealthBarGui")
@@ -46,6 +55,7 @@ end
 local function triggerVictory()
 	defeated = true
 	VictoryGui.Enabled = true
+	BossDefeated:Fire()
 end
 
 local function resetBoss()
