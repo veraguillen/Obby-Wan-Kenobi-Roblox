@@ -43,6 +43,9 @@ local PlayerDataModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitF
 local RescueState = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("RescueState"))
 local LifeLossModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("LifeLossModule"))
 
+local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
+local RescueMessageEvent = RemoteEvents:WaitForChild("RescueMessageEvent") :: RemoteEvent
+
 local ServerFolder = ServerScriptService:WaitForChild("Server")
 
 local RoomManagerScript = ServerFolder:WaitForChild("RoomManager")
@@ -167,6 +170,11 @@ function RescueSystem.KnockDown(player: Player)
 	local triggeredConnection: RBXScriptConnection
 	triggeredConnection = prompt.Triggered:Connect(function(reviver: Player)
 		if reviver == player then
+			RescueMessageEvent:FireClient(reviver, "No podes reanimarte a vos mismo")
+			return
+		end
+		if PlayerDataModule.GetAssignedTrack(reviver) ~= PlayerDataModule.GetAssignedTrack(player) then
+			RescueMessageEvent:FireClient(reviver, "Solo tu equipo puede reanimarte")
 			return
 		end
 		if downTokens[player] ~= myToken then

@@ -26,6 +26,9 @@
         },
         "DynamiteMessageEvent": {
           "$className": "RemoteEvent"
+        },
+        "RescueMessageEvent": {
+          "$className": "RemoteEvent"
         }
       }
     },
