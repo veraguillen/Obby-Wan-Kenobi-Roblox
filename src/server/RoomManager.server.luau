@@ -20,6 +20,11 @@ local PlayerDataModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitF
 local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local RoomStatusEvent = RemoteEvents:WaitForChild("RoomStatusEvent") :: RemoteEvent
 
+-- TEMPORAL -- diagnostico del bug de conteo inestable en cola (ver
+-- QueueDebugMessageClient.client.luau). Borrar junto con ese script y la
+-- entrada QueueDebugMessageEvent en default.project.json una vez resuelto.
+local QueueDebugMessageEvent = RemoteEvents:WaitForChild("QueueDebugMessageEvent") :: RemoteEvent
+
 -- Señal server-only (no replica al cliente) para que otros sistemas
 -- reseteen su propio estado al iniciar una ronda nueva, sin que RoomManager
 -- conozca ni dependa de ellos. Ver DynamiteSabotageSystem.server.luau y
@@ -219,11 +224,20 @@ updateDisplays = function()
 		label.Text = text
 	end)
 
+	-- TEMPORAL -- mismo punto donde buildStatusText ya imprime [Queue] con
+	-- ninjaCount/cowboyCount (ahi no hay lista de jugadores a la que
+	-- hacerle FireClient, por eso el broadcast vive aca, en el lugar que
+	-- SI itera ninjaQueue/cowboyQueue en cada llamada a updateDisplays).
+	local queueDebugMessage =
+		string.format("Ninjas: %d — Vaqueros: %d", countQueue(ninjaQueue), countQueue(cowboyQueue))
+
 	for player in pairs(ninjaQueue) do
 		RoomStatusEvent:FireClient(player, text, isRoomActive)
+		QueueDebugMessageEvent:FireClient(player, queueDebugMessage)
 	end
 	for player in pairs(cowboyQueue) do
 		RoomStatusEvent:FireClient(player, text, isRoomActive)
+		QueueDebugMessageEvent:FireClient(player, queueDebugMessage)
 	end
 end
 
@@ -449,6 +463,11 @@ local function onPortalTouched(hit: BasePart, trackName: string)
 
 	local queueSizeAfterAdd = countQueue(trackName == "Track_A" and ninjaQueue or cowboyQueue)
 	print(string.format("[Queue] onPortalTouched: %s -> %s (tamano cola=%d)", player.Name, trackName, queueSizeAfterAdd))
+	-- TEMPORAL -- ver nota junto a QueueDebugMessageEvent mas arriba.
+	QueueDebugMessageEvent:FireClient(
+		player,
+		string.format("En cola: %s (%d total)", trackName, queueSizeAfterAdd)
+	)
 
 	updateDisplays()
 	tryStartCountdown()
@@ -463,7 +482,7 @@ end
 -- portales de su lado, sostenido por QUEUE_ABANDON_GRACE_SECONDS. Recien
 -- ahi lo saca de la cola -- tolera pasar caminando cerca de mas de un
 -- portal del mismo lado sin ser expulsado.
-local function checkPlayerPresence(player: Player, portalPositions: { Vector3 }, now: number)
+local function checkPlayerPresence(player: Player, trackName: string, portalPositions: { Vector3 }, now: number)
 	local character = player.Character
 	if not character then
 		return
@@ -472,6 +491,21 @@ local function checkPlayerPresence(player: Player, portalPositions: { Vector3 },
 	if not humanoidRootPart then
 		return
 	end
+
+	-- TEMPORAL -- distancia en vivo al portal mas cercano, actualizada cada
+	-- QUEUE_PRESENCE_CHECK_INTERVAL mientras esta en cola, para poder
+	-- verificar QUEUE_PRESENCE_RADIUS con datos reales en vez de estimar a
+	-- ojo. Ver nota junto a QueueDebugMessageEvent mas arriba.
+	local nearestDistance = getNearestDistance(humanoidRootPart.Position, portalPositions)
+	QueueDebugMessageEvent:FireClient(
+		player,
+		string.format(
+			"En cola: %s — distancia al portal mas cercano: %.0f studs (radio: %d)",
+			trackName,
+			nearestDistance,
+			QUEUE_PRESENCE_RADIUS
+		)
+	)
 
 	if isWithinRadiusOfAny(humanoidRootPart.Position, portalPositions, QUEUE_PRESENCE_RADIUS) then
 		queueOutsideSince[player] = nil
@@ -485,13 +519,17 @@ local function checkPlayerPresence(player: Player, portalPositions: { Vector3 },
 	end
 
 	if now - outsideSince >= QUEUE_ABANDON_GRACE_SECONDS then
-		local nearestDistance = getNearestDistance(humanoidRootPart.Position, portalPositions)
 		print(string.format(
 			"[Queue] checkQueuePresence: remueve a %s (fuera %.1fs, distancia al portal mas cercano=%.1f)",
 			player.Name,
 			now - outsideSince,
 			nearestDistance
 		))
+		-- TEMPORAL -- ver nota junto a QueueDebugMessageEvent mas arriba.
+		QueueDebugMessageEvent:FireClient(
+			player,
+			string.format("Saliste de la cola (te alejaste %.0f studs)", nearestDistance)
+		)
 		removePlayerFromQueues(player)
 	end
 end
@@ -505,10 +543,10 @@ local function checkQueuePresence()
 	local now = Workspace:GetServerTimeNow()
 
 	for player in pairs(ninjaQueue) do
-		checkPlayerPresence(player, ninjaPortalPositions, now)
+		checkPlayerPresence(player, "Track_A", ninjaPortalPositions, now)
 	end
 	for player in pairs(cowboyQueue) do
-		checkPlayerPresence(player, cowboyPortalPositions, now)
+		checkPlayerPresence(player, "Track_B", cowboyPortalPositions, now)
 	end
 end
 

@@ -29,6 +29,9 @@
         },
         "RescueMessageEvent": {
           "$className": "RemoteEvent"
+        },
+        "QueueDebugMessageEvent": {
+          "$className": "RemoteEvent"
         }
       }
     },
