@@ -30,6 +30,17 @@ local CHECKPOINT_FLASH_COLOR = Color3.new(0, 1, 0)
 local CHECKPOINT_FLASH_DURATION = 1
 local LAST_STAGE_NUMBER = 5
 
+-- Aterrizaje al completar Stage 5, lejos del nucleo. El landing original
+-- (centro exacto de Boss_Arena_Floor) coincidia casi con Boss_Core -- ambos
+-- en X=500, Z=-340 (default.project.json) -- dejando al jugador a ~3 studs
+-- del jefe, muy dentro de SHOCKWAVE_RADIUS = 70 (BossFightSystem.server.
+-- luau). Boss_Arena_Floor mide 120x120 (medio-lado = 60), centrado en el
+-- nucleo; -55/-55 en X/Z apunta a la esquina suroeste del piso, pegada a
+-- Entry_Platform_A (que llega hasta X=440, Z=-400/-380 -- mismo archivo) --
+-- ~77.8 studs del nucleo (55*sqrt(2)), fuera del radio con margen, y a 5
+-- studs de cada borde del piso (no al ras, para no arriesgar caer afuera).
+local BOSS_ARENA_LANDING_OFFSET = Vector3.new(-55, LANDING_HEIGHT_OFFSET, -55)
+
 local function getStagePlatform(trackName: string, stageNumber: number): BasePart?
 	local track = Workspace:FindFirstChild(trackName)
 	local stageFolder = track and track:FindFirstChild("Stage_" .. stageNumber)
@@ -49,7 +60,7 @@ local function getBossArenaFloor(): BasePart?
 	return nil
 end
 
-local function advanceCharacterToNextStage(character: Model, trackName: string, completedStageNumber: number)
+local function advanceCharacterToNextStage(player: Player, character: Model, trackName: string, completedStageNumber: number)
 	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 	if not humanoidRootPart then
 		return
@@ -58,7 +69,11 @@ local function advanceCharacterToNextStage(character: Model, trackName: string, 
 	if completedStageNumber >= LAST_STAGE_NUMBER then
 		local bossFloor = getBossArenaFloor()
 		if bossFloor then
-			character:PivotTo(CFrame.new(bossFloor.Position + Vector3.new(0, LANDING_HEIGHT_OFFSET, 0)))
+			character:PivotTo(CFrame.new(bossFloor.Position + BOSS_ARENA_LANDING_OFFSET))
+			-- Inmunidad breve al entrar: ver BOSS_ARENA_ENTRY_GRACE_SECONDS en
+			-- BossFightSystem.server.luau, que consulta este mismo Attribute
+			-- antes de aplicar la onda expansiva.
+			player:SetAttribute("BossArenaEntryTime", Workspace:GetServerTimeNow())
 		end
 		return
 	end
@@ -135,7 +150,7 @@ local function onCheckpointTouched(pad: BasePart, hit: BasePart)
 		local checkpointCFrame = pad.CFrame + Vector3.new(0, LANDING_HEIGHT_OFFSET, 0)
 		PlayerDataModule.SetCheckpoint(player, stageNumber, checkpointCFrame)
 		flashCheckpointPad(pad)
-		advanceCharacterToNextStage(character :: Model, padTrack, stageNumber)
+		advanceCharacterToNextStage(player, character :: Model, padTrack, stageNumber)
 		CheckpointProgressEvent:FireAllClients(padTrack, stageNumber, LAST_STAGE_NUMBER)
 		CheckpointReached:Fire(padTrack, stageNumber, checkpointCFrame)
 		player:SetAttribute("HasReachedFirstCheckpoint", true)

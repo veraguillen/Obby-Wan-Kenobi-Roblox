@@ -43,6 +43,18 @@ local WARNING_PULSE_INTERVAL = 0.2
 local WARNING_COLOR = Color3.new(1, 1, 1)
 local SHOCKWAVE_RADIUS = 70
 
+-- Inmunidad breve al entrar a Boss_Arena: el loop de ataque de mas abajo
+-- corre desde que arranca el server, en un ciclo continuo (~ATTACK_REST_
+-- SECONDS + WARNING_DURATION_SECONDS) totalmente ajeno a cuando llega un
+-- jugador -- sin esto, un jugador podia aparecer (CheckpointSystem.server.
+-- luau, advanceCharacterToNextStage) en cualquier punto del ciclo, incluido
+-- el instante exacto de executeShockwave, sin haber visto ningun aviso.
+-- Attribute separado de LastRespawnTime (que ya usa DynamiteSabotageSystem.
+-- server.luau para su propia inmunidad post-caida en las stages) a
+-- proposito, para no acoplar dos sistemas de inmunidad con semantica
+-- distinta -- este es especifico de la llegada a Boss_Arena.
+local BOSS_ARENA_ENTRY_GRACE_SECONDS = 3
+
 local originalCoreColor = BossCore.Color
 local bossHealth = BOSS_MAX_HEALTH
 local defeated = false
@@ -104,8 +116,20 @@ end
 
 BossCore.Touched:Connect(onCoreTouched)
 
+local function hasBossArenaEntryImmunity(player: Player): boolean
+	local entryTime = player:GetAttribute("BossArenaEntryTime")
+	if typeof(entryTime) ~= "number" then
+		return false
+	end
+	return (Workspace:GetServerTimeNow() - entryTime) < BOSS_ARENA_ENTRY_GRACE_SECONDS
+end
+
 local function executeShockwave()
 	for _, player in ipairs(Players:GetPlayers()) do
+		if hasBossArenaEntryImmunity(player) then
+			continue
+		end
+
 		local character = player.Character
 		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
 		if humanoidRootPart and humanoidRootPart:IsA("BasePart") then
