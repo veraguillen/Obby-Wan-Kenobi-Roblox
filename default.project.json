@@ -311,9 +311,21 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [0, 16, 0],
-              "Size": [450, 4, 150]
+              "Position": [0, 16, -60],
+              "Size": [24, 4, 24]
             }
+          },
+          "Jump_Platform_1": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [0, 19, -35], "Size": [12, 2, 12] }
+          },
+          "Jump_Platform_2": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [0, 23, -15], "Size": [12, 2, 12] }
+          },
+          "Jump_Platform_3": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [0, 19, 4], "Size": [12, 2, 12] }
           },
           "Start_Barrier": {
             "$className": "Part",
@@ -344,8 +356,8 @@
               "Anchored": true,
               "Material": "Plastic",
               "Color": [1, 1, 0],
-              "Position": [0, 16, 0],
-              "Size": [20, 4, 20]
+              "Position": [0, 20, 25],
+              "Size": [18, 4, 18]
             }
           },
           "HostNPC": {
@@ -362,12 +374,6 @@
                 "Size": [4, 6, 2]
               }
             }
-          },
-          "TestStairs": {
-            "$className": "Folder",
-            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [22.00, 6.00, 0.00], "Size": [12, 2, 6] } },
-            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [19.05, 11.00, 11.00], "Size": [12, 2, 6] } },
-            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [11.00, 16.00, 19.05], "Size": [12, 2, 6] } }
           },
           "Wall_North": {
             "$className": "Part",
@@ -752,9 +758,21 @@
             "$properties": {
               "Anchored": true,
               "Material": "Plastic",
-              "Position": [1000, 16, 0],
-              "Size": [450, 4, 150]
+              "Position": [1000, 16, -60],
+              "Size": [24, 4, 24]
             }
+          },
+          "Jump_Platform_1": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1000, 19, -35], "Size": [12, 2, 12] }
+          },
+          "Jump_Platform_2": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1000, 23, -15], "Size": [12, 2, 12] }
+          },
+          "Jump_Platform_3": {
+            "$className": "Part",
+            "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1000, 19, 4], "Size": [12, 2, 12] }
           },
           "Start_Barrier": {
             "$className": "Part",
@@ -785,8 +803,8 @@
               "Anchored": true,
               "Material": "Plastic",
               "Color": [1, 1, 0],
-              "Position": [1000, 16, 0],
-              "Size": [20, 4, 20]
+              "Position": [1000, 20, 25],
+              "Size": [18, 4, 18]
             }
           },
           "HostNPC": {
@@ -803,12 +821,6 @@
                 "Size": [4, 6, 2]
               }
             }
-          },
-          "TestStairs": {
-            "$className": "Folder",
-            "Step_01": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1022.00, 6.00, 0.00], "Size": [12, 2, 6] } },
-            "Step_02": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1019.05, 11.00, 11.00], "Size": [12, 2, 6] } },
-            "Step_03": { "$className": "Part", "$properties": { "Anchored": true, "CanCollide": true, "Material": "SmoothPlastic", "Color": [0.5, 0.5, 0.5], "Position": [1011.00, 16.00, 19.05], "Size": [12, 2, 6] } }
           },
           "Wall_North": {
             "$className": "Part",
